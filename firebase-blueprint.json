@@ -1,0 +1,134 @@
+{
+  "entities": {
+    "Task": {
+      "title": "Task",
+      "description": "A daily task or reminder",
+      "type": "object",
+      "properties": {
+        "text": { "type": "string" },
+        "completed": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["text", "completed", "createdAt"]
+    },
+    "Habit": {
+      "title": "Habit",
+      "description": "A recurring daily habit",
+      "type": "object",
+      "properties": {
+        "text": { "type": "string" },
+        "completed": { "type": "boolean" }
+      },
+      "required": ["text", "completed"]
+    },
+    "Workout": {
+      "title": "Workout",
+      "description": "A fitness activity record",
+      "type": "object",
+      "properties": {
+        "type": { "type": "string" },
+        "duration": { "type": "number" },
+        "calories": { "type": "number" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["type", "duration", "calories", "timestamp"]
+    },
+    "Meal": {
+      "title": "Meal",
+      "description": "A nutrition record",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "calories": { "type": "number" },
+        "type": { "enum": ["breakfast", "lunch", "dinner", "snack"] }
+      },
+      "required": ["name", "calories", "type"]
+    },
+    "Badge": {
+      "title": "Badge",
+      "description": "An achievement badge",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "icon": { "type": "string" },
+        "rarity": { "enum": ["common", "rare", "epic", "legendary"] },
+        "unlockedAt": { "type": "string", "format": "date-time" },
+        "requirement": { "type": "string" }
+      },
+      "required": ["title", "description", "icon", "rarity", "requirement"]
+    },
+    "DailyLog": {
+      "title": "Daily Log",
+      "description": "Historical health data log",
+      "type": "object",
+      "properties": {
+        "date": { "type": "string", "format": "date" },
+        "waterAmount": { "type": "number" },
+        "sleepHours": { "type": "number" },
+        "mood": { "type": ["string", "null"] },
+        "steps": { "type": "number" },
+        "activeMinutes": { "type": "number" },
+        "completedHabitsCount": { "type": "number" },
+        "totalHabitsCount": { "type": "number" },
+        "completedTasksCount": { "type": "number" },
+        "totalTasksCount": { "type": "number" },
+        "consumedCalories": { "type": "number" }
+      },
+      "required": ["date", "waterAmount", "sleepHours", "steps", "activeMinutes"]
+    },
+    "UserMetrics": {
+      "title": "User Metrics",
+      "description": "General health and sync status",
+      "type": "object",
+      "properties": {
+        "waterAmount": { "type": "number" },
+        "sleepHours": { "type": "number" },
+        "mood": { "type": ["string", "null"] },
+        "pregnancyWeek": { "type": "number" },
+        "steps": { "type": "number" },
+        "activeMinutes": { "type": "number" },
+        "calorieGoal": { "type": "number" },
+        "notificationsEnabled": { "type": "boolean" },
+        "isTrackingSleep": { "type": "boolean" },
+        "sleepStartTime": { "type": ["number", "null"] },
+        "xp": { "type": "number" },
+        "level": { "type": "number" },
+        "streak": { "type": "number" },
+        "unlockedThemes": { "type": "array", "items": { "type": "string" } },
+        "unlockedTitles": { "type": "array", "items": { "type": "string" } },
+        "unlockedUpgrades": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": "UserMetrics",
+      "description": "User specific health metrics"
+    },
+    "users/{userId}/tasks/{taskId}": {
+      "schema": "Task",
+      "description": "User task list"
+    },
+    "users/{userId}/habits/{habitId}": {
+      "schema": "Habit",
+      "description": "User daily habits"
+    },
+    "users/{userId}/workouts/{workoutId}": {
+      "schema": "Workout",
+      "description": "User fitness history"
+    },
+    "users/{userId}/meals/{mealId}": {
+      "schema": "Meal",
+      "description": "User nutrition history"
+    },
+    "users/{userId}/badges/{badgeId}": {
+      "schema": "Badge",
+      "description": "User achievements"
+    },
+    "users/{userId}/dailyLogs/{logId}": {
+      "schema": "DailyLog",
+      "description": "User daily history logs"
+    }
+  }
+}

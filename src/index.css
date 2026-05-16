@@ -6,15 +6,37 @@
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 }
 
+@layer base {
+  * {
+    @apply transition-colors duration-300 ease-in-out;
+  }
+  body {
+    @apply bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 selection:bg-blue-500 selection:text-white;
+  }
+}
+
 @utility glass-card {
-  background: rgba(24, 24, 27, 0.6);
-  border: 1px solid rgba(39, 39, 42, 1);
-  border-radius: 12px;
-  backdrop-filter: blur(8px);
+  @apply bg-white/70 dark:bg-zinc-900/30 border border-zinc-200 dark:border-zinc-800/50 rounded-2xl backdrop-blur-xl shadow-xl shadow-black/5;
+}
+
+@utility glass-card-hover {
+  @apply hover:bg-white dark:hover:bg-zinc-800/40 hover:border-zinc-300 dark:hover:border-zinc-700/50 hover:shadow-2xl hover:shadow-blue-500/5;
 }
 
 @utility accent-glow {
-  box-shadow: 0 0 20px rgba(59, 130, 246, 0.1);
+  @apply shadow-2xl shadow-blue-500/5 dark:shadow-blue-500/10;
+}
+
+@utility neon-glow-blue {
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+}
+
+@utility neon-glow-emerald {
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+}
+
+@utility neon-glow-rose {
+  box-shadow: 0 0 15px rgba(244, 63, 94, 0.4);
 }
 
 @utility scroll-hide {
@@ -24,20 +46,65 @@
   }
 }
 
-/* Custom Scrollbar for Dark Theme */
+@utility cyber-border {
+  @apply relative overflow-hidden;
+  &::before {
+    content: '';
+    @apply absolute inset-0 border border-white/10 pointer-events-none rounded-[inherit];
+  }
+  &::after {
+    content: '';
+    @apply absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent pointer-events-none;
+  }
+}
+
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #0a0a0a;
+  @apply bg-zinc-50 dark:bg-zinc-950;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #222;
-  border-radius: 10px;
+  @apply bg-zinc-300 dark:bg-zinc-800 rounded-full;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #333;
+  @apply bg-zinc-400 dark:bg-zinc-700;
+}
+
+.markdown-content p {
+  margin-bottom: 0.75rem;
+}
+
+.markdown-content p:last-child {
+  margin-bottom: 0;
+}
+
+.markdown-content ul, .markdown-content ol {
+  margin-bottom: 0.75rem;
+  padding-left: 1.25rem;
+}
+
+.markdown-content li {
+  margin-bottom: 0.25rem;
+}
+
+.markdown-content h1, .markdown-content h2, .markdown-content h3 {
+  font-weight: 700;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  @apply text-zinc-900 dark:text-white;
+}
+
+.markdown-content strong {
+  font-weight: 700;
+  @apply text-blue-600 dark:text-blue-400;
+}
+
+.markdown-content code {
+  font-family: var(--font-mono);
+  @apply bg-zinc-200/50 dark:bg-zinc-800/50 text-zinc-900 dark:text-zinc-200 px-1.5 py-0.5 rounded text-[0.9em] border border-zinc-200 dark:border-zinc-700/50;
 }

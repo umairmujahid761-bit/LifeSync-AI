@@ -1,0 +1,152 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Global Helpers
+    function isSignedIn() { return request.auth != null; }
+    function isOwner(userId) { return isSignedIn() && request.auth.uid == userId; }
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    
+    // Admin check - including user's specific email as a bootstrapped admin
+    function isAdmin() { 
+      return isSignedIn() && (
+        request.auth.token.email == 'umairmujahid761@gmail.com' && request.auth.token.email_verified == true
+      );
+    }
+
+    // Validation Helpers
+    function isValidTask(data) {
+      return data.keys().hasAll(['text', 'completed', 'createdAt']) &&
+             data.text is string && data.text.size() <= 1000 &&
+             data.completed is bool &&
+             data.createdAt is string;
+    }
+
+    function isValidHabit(data) {
+       return data.keys().hasAll(['text', 'completed']) &&
+              data.text is string && data.text.size() <= 500 &&
+              data.completed is bool;
+    }
+
+    function isValidWorkout(data) {
+       return data.keys().hasAll(['type', 'duration', 'calories', 'timestamp']) &&
+              data.type is string &&
+              data.duration is number &&
+              data.calories is number &&
+              data.timestamp is string;
+    }
+
+    function isValidMeal(data) {
+       return data.keys().hasAll(['name', 'calories', 'type']) &&
+              data.name is string &&
+              data.calories is number &&
+              data.type in ['breakfast', 'lunch', 'dinner', 'snack'];
+    }
+
+    function isValidBadge(data) {
+      return data.keys().hasAll(['id', 'title', 'description', 'icon', 'rarity', 'requirement', 'unlockedAt']) &&
+             data.id is string &&
+             data.title is string &&
+             data.description is string &&
+             data.icon is string &&
+             data.rarity in ['common', 'rare', 'epic', 'legendary'] &&
+             data.requirement is string &&
+             data.unlockedAt is string;
+    }
+
+    function isValidDailyLog(data) {
+      return data.keys().hasAll(['date', 'waterAmount', 'sleepHours', 'steps', 'activeMinutes', 'completedHabitsCount', 'totalHabitsCount', 'completedTasksCount', 'totalTasksCount', 'consumedCalories']) &&
+             data.date is string && 
+             data.waterAmount is number &&
+             data.sleepHours is number && 
+             data.steps is number &&
+             data.activeMinutes is number &&
+             data.completedHabitsCount is number &&
+             data.totalHabitsCount is number &&
+             data.completedTasksCount is number &&
+             data.totalTasksCount is number &&
+             data.consumedCalories is number &&
+             (data.mood == null || data.mood is string);
+    }
+
+    function isValidMetrics(data) {
+      return (data.get('waterAmount', 0) is number) &&
+             (data.get('sleepHours', 0) is number) &&
+             (data.get('mood', null) == null || data.get('mood', null) is string) &&
+             (data.get('pregnancyWeek', 0) is number) &&
+             (data.get('steps', 0) is number) &&
+             (data.get('activeMinutes', 0) is number) &&
+             (data.get('calorieGoal', 0) is number) &&
+             (data.get('notificationsEnabled', false) is bool) &&
+             (data.get('isTrackingSleep', false) is bool) &&
+             (data.get('sleepStartTime', null) == null || data.get('sleepStartTime', null) is number) &&
+             (data.get('xp', 0) is number) &&
+             (data.get('level', 1) is number) &&
+             (data.get('streak', 0) is number) &&
+             (data.get('unlockedThemes', []) is list) &&
+             (data.get('unlockedTitles', []) is list) &&
+             (data.get('unlockedUpgrades', []) is list);
+    }
+
+    // Collection Rules
+    match /users/{userId} {
+      allow get: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && isValidMetrics(incoming());
+      allow update: if (isOwner(userId) || isAdmin()) && isValidMetrics(incoming());
+
+      match /tasks/{taskId} {
+        allow get: if isOwner(userId) || isAdmin();
+        allow list: if isOwner(userId) || isAdmin();
+        allow create: if isOwner(userId) && isValidTask(incoming());
+        allow update: if (isOwner(userId) && isValidTask(incoming())) || isAdmin();
+        allow delete: if isOwner(userId) || isAdmin();
+      }
+
+      match /habits/{habitId} {
+        allow get: if isOwner(userId) || isAdmin();
+        allow list: if isOwner(userId) || isAdmin();
+        allow create: if isOwner(userId) && isValidHabit(incoming());
+        allow update: if (isOwner(userId) && isValidHabit(incoming())) || isAdmin();
+        allow delete: if isOwner(userId) || isAdmin();
+      }
+
+      match /workouts/{workoutId} {
+        allow get: if isOwner(userId) || isAdmin();
+        allow list: if isOwner(userId) || isAdmin();
+        allow create: if isOwner(userId) && isValidWorkout(incoming());
+        allow update: if (isOwner(userId) && isValidWorkout(incoming())) || isAdmin();
+        allow delete: if isOwner(userId) || isAdmin();
+      }
+
+      match /meals/{mealId} {
+        allow get: if isOwner(userId) || isAdmin();
+        allow list: if isOwner(userId) || isAdmin();
+        allow create: if isOwner(userId) && isValidMeal(incoming());
+        allow update: if (isOwner(userId) && isValidMeal(incoming())) || isAdmin();
+        allow delete: if isOwner(userId) || isAdmin();
+      }
+
+      match /badges/{badgeId} {
+        allow get: if isOwner(userId) || isAdmin();
+        allow list: if isOwner(userId) || isAdmin();
+        allow create, update: if isOwner(userId) && isValidBadge(incoming());
+        allow delete: if isAdmin();
+      }
+
+      match /dailyLogs/{logId} {
+        allow get: if isOwner(userId) || isAdmin();
+        allow list: if isOwner(userId) || isAdmin();
+        allow create: if isOwner(userId) && isValidDailyLog(incoming());
+        allow update: if (isOwner(userId) && isValidDailyLog(incoming())) || isAdmin();
+        allow delete: if isAdmin();
+      }
+    }
+  }
+}
